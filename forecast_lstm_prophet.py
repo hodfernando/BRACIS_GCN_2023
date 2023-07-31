@@ -176,7 +176,7 @@ for city in range(train_data_no_norm.shape[1]):
     future = m.make_future_dataframe(periods=test_data_no_norm[:, city].shape[0])
     prophet_pred = m.predict(future)
 
-    pred_prophet[:, city] = prophet_pred['yhat'][-test_data_no_norm[:, 0].shape[0]:].values
+    pred_prophet[:, city] = prophet_pred['yhat'][-test_data_no_norm[:, city].shape[0]:].values
 
     # plt.figure(figsize=(10, 8))
     # ax = sns.lineplot(x=[x for x in range(test_data_no_norm[:, city].shape[0])], y=test_data_no_norm[:, city])
@@ -187,8 +187,8 @@ for city in range(train_data_no_norm.shape[1]):
     prophet_rmse_error_city[city] = mean_squared_error(test_data_no_norm[:, city], pred_prophet[:, city],
                                                        squared=False)
 
-    prophet_r2_city[city] = r2_score(test_data_no_norm[:, 0],
-                                     prophet_pred['yhat'][-test_data_no_norm[:, 0].shape[0]:].values)
+    prophet_r2_city[city] = r2_score(test_data_no_norm[:, city],
+                                     prophet_pred['yhat'][-test_data_no_norm[:, city].shape[0]:].values)
 
 #################
 
