@@ -105,7 +105,7 @@ prophet_r2_city = np.zeros((test_data_no_norm.shape[1]))
 
 for city in range(train_data_no_norm.shape[1]):
     print('Cidade', city)
-    print('GCLSTM')
+    print('LSTM')
 
     train_inout_seq = create_inout_sequences(torch.FloatTensor(train_data[:, city]).view(-1), lags)
 
@@ -203,8 +203,8 @@ for codemundv in datasetLoader.CODMUNDV:
     nomemun.append(aux.iloc[0])
 
 metrics = pd.DataFrame(
-    {"NOMENUM": nomemun, "GCLSTM RMSE": lstm_rmse_error_city, "Prophet RMSE": prophet_rmse_error_city,
-     "GCLSTM R2": lstm_r2_city, "Prophet R2": prophet_r2_city})
+    {"NOMENUM": nomemun, "LSTM RMSE": lstm_rmse_error_city, "Prophet RMSE": prophet_rmse_error_city,
+     "LSTM R2": lstm_r2_city, "Prophet R2": prophet_r2_city})
 
 city = 0  # Manaus
 
