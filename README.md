@@ -32,6 +32,8 @@ A instalação deve ser feita utilizando o arquivo `requirements.txt` fornecido.
 
 Para utilizar, executando o código `compute_predictions.py` gera os resultados para os modelos based-GCNs. O código `forecast_lstm_prophet.py`, que gera os resultados para os modelos LSTM e Prophet.
 
+O script `create_networks.py` cria as redes de mobilidade com diversos pesos.
+
 ## Pastas
 
 - `/raw_data`: Contém os dados originais utilizados no projeto.
