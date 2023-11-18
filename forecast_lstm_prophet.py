@@ -131,7 +131,7 @@ for city in range(train_data_no_norm.shape[1]):
 
     print(f'epoch: {i:3} loss: {single_loss.item():10.10f}')
 
-    test_inout_seq = create_inout_sequences(torch.FloatTensor(test_data[:, 0]).view(-1), lags)
+    test_inout_seq = create_inout_sequences(torch.FloatTensor(test_data[:, city]).view(-1), lags)
 
     model.eval()
 
