@@ -4,7 +4,7 @@ import dash
 import numpy as np
 from dash import dcc, html
 import pandas as pd
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_squared_error
 
 # Path do diretório atual
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -62,6 +62,47 @@ for modelo in modelos:
     pred_modelo = globals()[f'pred_{modelo.lower()}']  # Obtém a variável pred_gclstm, pred_gcrn ou pred_prophet
     r2_modelo = [r2_score(y_real[i, :], pred_modelo[i, :]) for i in range(y_real.shape[0])]
     df_time[f'R2_{modelo}'] = r2_modelo
+
+# Criando um DataFrame
+df_stats_pred = pd.DataFrame({
+    'Model': ['GCLSTM', 'GCRN', 'Prophet', 'LSTM'],
+    'Max': [np.max(pred_gclstm), np.max(pred_gcrn), np.max(pred_prophet), np.max(pred_lstm)],
+    'Min': [np.min(pred_gclstm), np.min(pred_gcrn), np.min(pred_prophet), np.min(pred_lstm)],
+    'Mean': [np.mean(pred_gclstm), np.mean(pred_gcrn), np.mean(pred_prophet), np.mean(pred_lstm)],
+    'Std': [np.std(pred_gclstm), np.std(pred_gcrn), np.std(pred_prophet), np.std(pred_lstm)],
+})
+
+# Exibindo o DataFrame de estatísticas
+print(df_stats_pred)
+
+rmse_gclstm_all = np.load(results_gclstm + f'\\2020-2022\\metric_RMSE_all_2020-2022.npy')
+
+rmse_gcrn_all = np.load(results_gcrn + f'\\2020-2022\\metric_RMSE_all_2020-2022.npy')
+
+rmse_lstm_all = df_city['LSTM RMSE']
+
+rmse_prophet_all = df_city['Prophet RMSE']
+
+models = ['GCLSTM', 'GCRN', 'LSTM', 'Prophet']
+dfs = []
+
+for model in models:
+    predictions = globals()[f'rmse_{model.lower()}_all']
+    rmse_model = predictions
+    model_stats = {
+        'Model': model,
+        'Max': np.max(rmse_model),
+        'Min': np.min(rmse_model),
+        'Mean': np.mean(rmse_model),
+        'Std': np.std(rmse_model),
+    }
+    dfs.append(model_stats)
+
+# Criando o DataFrame de estatísticas
+df_stats_error = pd.DataFrame(dfs)
+
+# Exibindo o DataFrame de estatísticas
+print(df_stats_error)
 
 # Inicie o aplicativo Dash
 app = dash.Dash(__name__)
