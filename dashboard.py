@@ -57,7 +57,7 @@ df_time = pd.DataFrame(
               list(range(lags - 1, lags * y_real.shape[0], lags))]})
 
 # Adicionar colunas de R2 para cada modelo
-modelos = ['GCLSTM', 'GCRN', 'Prophet']
+modelos = ['GCLSTM', 'GCRN', 'Prophet', 'LSTM']
 for modelo in modelos:
     pred_modelo = globals()[f'pred_{modelo.lower()}']  # Obtém a variável pred_gclstm, pred_gcrn ou pred_prophet
     r2_modelo = [r2_score(y_real[i, :], pred_modelo[i, :]) for i in range(y_real.shape[0])]
@@ -82,7 +82,8 @@ app.layout = html.Div([
                 'title': 'Resultados de RMSE por Cidade',
                 'barmode': 'group',
                 'yaxis': {'title': 'RMSE'},
-                'margin': {'l': 50, 'r': 50, 't': 30, 'b': 30},  # Adiciona um espaço vertical menor
+                'margin': {'l': 50, 'r': 50, 't': 30, 'b': 150},
+                'xaxis': {'tickangle': -45},
             }
         }
     ),
@@ -105,7 +106,8 @@ app.layout = html.Div([
                 'title': 'Resultados de Avg. Yhat por Cidade',
                 'barmode': 'group',
                 'yaxis': {'title': 'Valor'},
-                'margin': {'l': 50, 'r': 50, 't': 30, 'b': 30},  # Adiciona um espaço vertical menor
+                'margin': {'l': 50, 'r': 50, 't': 30, 'b': 150},
+                'xaxis': {'tickangle': -45},
             }
         }
     ),
@@ -124,7 +126,7 @@ app.layout = html.Div([
             'layout': {
                 'title': 'Resultados de R2 ao longo do tempo',
                 'yaxis': {'title': 'R2'},
-                'margin': {'l': 50, 'r': 50, 't': 30, 'b': 30},  # Adiciona um espaço vertical menor
+                'margin': {'l': 50, 'r': 50, 't': 30, 'b': 80},
             }
         }
     ),
