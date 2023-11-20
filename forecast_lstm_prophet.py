@@ -3,7 +3,6 @@ import pickle
 import numpy as np
 import pandas as pd
 import os
-import statsmodels.api as sm
 import torch
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
@@ -142,11 +141,11 @@ for city in range(train_data_no_norm.shape[1]):
             test_outs.append(model(seq).item())
 
     pred_lstm[:, city] = (
-            (np.array(test_outs) * datasetLoader.std_stacked_dataset[0]) + datasetLoader.mean_stacked_dataset[0])
+            (np.array(test_outs) * datasetLoader.std_stacked_dataset[city]) + datasetLoader.mean_stacked_dataset[city])
     # print(actual_predictions)
 
     test_targets = [
-        ((np.float32(labels) * datasetLoader.std_stacked_dataset[0]) + datasetLoader.mean_stacked_dataset[0])
+        ((np.float32(labels) * datasetLoader.std_stacked_dataset[city]) + datasetLoader.mean_stacked_dataset[city])
         for seq, labels in test_inout_seq]
 
     lstm_rmse_error_city[city] = mean_squared_error(test_targets, pred_lstm[:, city], squared=False)
@@ -209,15 +208,14 @@ metrics = pd.DataFrame(
 city = 0  # Manaus
 
 plt.figure(figsize=(16, 9))
-plt.plot_date(x=sequence_lag(test_data_pr.ds, lags), y=sequence_lag(test_data_no_norm[:, 0], lags), linestyle="-",
+plt.plot_date(x=sequence_lag(test_data_pr.ds, lags), y=sequence_lag(test_data_no_norm[:, city], lags), linestyle="-",
               label="test_data")
-plt.plot_date(x=sequence_lag(test_data_pr.ds, lags), y=pred_lstm[:, 0], linestyle="--", label="pred_lstm")
-plt.plot_date(x=sequence_lag(test_data_pr.ds, lags), y=sequence_lag(pred_prophet[:, 0], lags), linestyle=":",
+plt.plot_date(x=sequence_lag(test_data_pr.ds, lags), y=pred_lstm[:, city], linestyle="--", label="pred_lstm")
+plt.plot_date(x=sequence_lag(test_data_pr.ds, lags), y=sequence_lag(pred_prophet[:, city], lags), linestyle=":",
               label="pred_prophet")
 plt.legend(title=nomemun[city])
 plt.show()
 
-metrics.to_csv(path_or_buf=mydir + f'/results/{nameModel}/{datasets}/R2_RMSE_LSTM_Prophet.csv', sep=';',
-               index=False)
-np.save(mydir + f'/results/{nameModel}/{datasets}/pred_lstm.npy', pred_lstm)
-np.save(mydir + f'/results/{nameModel}/{datasets}/pred_prophet.npy', pred_prophet)
+metrics.to_csv(path_or_buf=mydir + f'/results/LSTM_Prophet/R2_RMSE_LSTM_Prophet.csv', sep=';', index=False)
+np.save(mydir + f'/results/LSTM_Prophet/pred_lstm.npy', pred_lstm)
+np.save(mydir + f'/results/LSTM_Prophet/pred_prophet.npy', pred_prophet)
