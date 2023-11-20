@@ -122,15 +122,15 @@ fig.savefig(mydir + '/results/timeseries.eps', format='eps', dpi=1200, bbox_inch
 # Rankeamento BMA
 
 # Definição dos modelos e suas probabilidades a priori
-models = ['GCRN', 'GCLSTM', 'GCLSTM', 'Prophet']
+models = ['GCRN', 'GCLSTM', 'LSTM', 'Prophet']
 prior_probs = [0.25, 0.25, 0.25, 0.25]  # prior probabilities
 evidences = [0.01, 0.01, 0.01, 0.01]  # likelihoods (evidences)
 
 # Dados da tabela
-rmse_mean = [3059.50, 3583.88, 13267.66, 482.95]
-rmse_max = [3699.74, 4569.97, 963263.36, 52058.21]
-rmse_min = [2108.77, 2847.56, 115.91, 1.49]
-rmse_std = [500.39, 452.59, 34109.31, 1758.85]
+rmse_mean = [3059.50, 3583.88, 396.71, 480.74]
+rmse_max = [3699.74, 4569.97, 250275.07, 51597.08]
+rmse_min = [2108.77, 2847.56, 0.001, 1.32]
+rmse_std = [500.39, 452.59, 4574.69, 1703.10]
 
 # Pesos de cada característica
 weights_mean = 0.4
@@ -188,12 +188,6 @@ fig.savefig(mydir + '/results/ranking_bma.png', dpi=300, bbox_inches='tight')
 fig.savefig(mydir + '/results/ranking_bma.eps', format='eps', dpi=1200, bbox_inches='tight')
 
 # Rankeamento normal
-# Definindo os modelos e os valores de RMSE
-models = ['GCRN', 'GCLSTM', 'GCLSTM', 'Prophet']
-rmse_mean = [3059.50, 3583.88, 13267.66, 482.95]
-rmse_max = [3699.74, 4569.97, 963263.36, 52058.21]
-rmse_min = [2108.77, 2847.56, 115.91, 1.49]
-rmse_std = [500.39, 452.59, 34109.31, 1758.85]
 
 # Calculando o ranking dos modelos
 ranking_rmse = []
@@ -263,8 +257,7 @@ plt.show()
 
 fig.savefig(mydir + f'/results/{nameModel}/{datasets}/InfecVsMun_day_29_11_2022_{nameModel}.png', dpi=300)
 fig.savefig(mydir + f'/results/{nameModel}/{datasets}/InfecVsMun_day_29_11_2022_{nameModel}.eps', format='eps',
-            dpi=1200,
-            bbox_inches='tight')
+            dpi=1200, bbox_inches='tight')
 
 # Calcular o valor p
 _, p_value = ttest_rel(y_pred_mean_no_rep, y_real_mean_no_rep)
