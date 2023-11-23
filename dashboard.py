@@ -27,26 +27,17 @@ pred_lstm = np.load(results_prophet + f'\\pred_lstm.npy')
 # Carregando os dados reais
 y_real = np.load(results_gclstm + f'\\2020-2022\\y_real_no_norm_2020-2022.npy').mean(axis=0)
 
-# RMSE do modelo GCLSTM
-rmse_gclstm = np.load(results_gclstm + f'\\2020-2022\\metric_RMSE_by_city_2020-2022.npy')
+# Criando um DataFrame
+df_stats_pred = pd.DataFrame({
+    'Model': ['GCLSTM', 'GCRN', 'Prophet', 'LSTM'],
+    'Max': [np.max(pred_gclstm), np.max(pred_gcrn), np.max(pred_prophet), np.max(pred_lstm)],
+    'Min': [np.min(pred_gclstm), np.min(pred_gcrn), np.min(pred_prophet), np.min(pred_lstm)],
+    'Mean': [np.mean(pred_gclstm), np.mean(pred_gcrn), np.mean(pred_prophet), np.mean(pred_lstm)],
+    'Std': [np.std(pred_gclstm), np.std(pred_gcrn), np.std(pred_prophet), np.std(pred_lstm)],
+})
 
-# RMSE do modelo GCRN
-rmse_gcrn = np.load(results_gcrn + f'\\2020-2022\\metric_RMSE_by_city_2020-2022.npy')
-
-# R2 e RMSE do modelo Prophet
-df_city = pd.read_csv(results_prophet + '\\R2_RMSE_LSTM_Prophet.csv', sep=';')
-df_city.drop(['LSTM R2', 'Prophet R2'], axis=1, inplace=True)
-
-# Completa o DataFrame com os resultados dos modelos GCLSTM e GCRN
-df_city['GCLSTM RMSE'] = np.mean(rmse_gclstm, axis=0)
-df_city['GCRN RMSE'] = np.mean(rmse_gcrn, axis=0)
-
-# Insere os resultados no DataFrame df_city
-df_city['Avg. Yhat GCLSTM'] = np.mean(pred_gclstm, axis=0)
-df_city['Avg. Yhat GCRN'] = np.mean(pred_gcrn, axis=0)
-df_city['Avg. Yhat Prophet'] = np.mean(pred_prophet, axis=0)
-df_city['Avg. Yhat LSTM'] = np.mean(pred_lstm, axis=0)
-df_city['Y'] = np.mean(y_real, axis=0)
+# Exibindo o DataFrame de estatísticas
+print(df_stats_pred)
 
 # Número de lags
 lags = 14
@@ -63,46 +54,81 @@ for modelo in modelos:
     r2_modelo = [r2_score(y_real[i, :], pred_modelo[i, :]) for i in range(y_real.shape[0])]
     df_time[f'R2_{modelo}'] = r2_modelo
 
-# Criando um DataFrame
-df_stats_pred = pd.DataFrame({
-    'Model': ['GCLSTM', 'GCRN', 'Prophet', 'LSTM'],
-    'Max': [np.max(pred_gclstm), np.max(pred_gcrn), np.max(pred_prophet), np.max(pred_lstm)],
-    'Min': [np.min(pred_gclstm), np.min(pred_gcrn), np.min(pred_prophet), np.min(pred_lstm)],
-    'Mean': [np.mean(pred_gclstm), np.mean(pred_gcrn), np.mean(pred_prophet), np.mean(pred_lstm)],
-    'Std': [np.std(pred_gclstm), np.std(pred_gcrn), np.std(pred_prophet), np.std(pred_lstm)],
-})
+# R2 e RMSE do modelo Prophet
+df_city = pd.read_csv(results_prophet + '\\R2_RMSE_LSTM_Prophet.csv', sep=';')
+df_city.drop(['LSTM R2', 'Prophet R2'], axis=1, inplace=True)
 
-# Exibindo o DataFrame de estatísticas
-print(df_stats_pred)
+# Completa o DataFrame com os resultados dos modelos GCLSTM e GCRN
+df_city['GCLSTM RMSE'] = np.array(
+    [mean_squared_error(y_real[:, ind], pred_gclstm[:, ind], squared=False) for ind in range(y_real.shape[1])])
+df_city['GCRN RMSE'] = np.array(
+    [mean_squared_error(y_real[:, ind], pred_gcrn[:, ind], squared=False) for ind in range(y_real.shape[1])])
 
-rmse_gclstm_all = np.load(results_gclstm + f'\\2020-2022\\metric_RMSE_all_2020-2022.npy')
+# Insere os resultados no DataFrame df_city
+df_city['Avg. Yhat GCLSTM'] = np.mean(pred_gclstm, axis=0)
+df_city['Avg. Yhat GCRN'] = np.mean(pred_gcrn, axis=0)
+df_city['Avg. Yhat Prophet'] = np.mean(pred_prophet, axis=0)
+df_city['Avg. Yhat LSTM'] = np.mean(pred_lstm, axis=0)
+df_city['Y'] = np.mean(y_real, axis=0)
 
-rmse_gcrn_all = np.load(results_gcrn + f'\\2020-2022\\metric_RMSE_all_2020-2022.npy')
-
-rmse_lstm_all = df_city['LSTM RMSE']
-
-rmse_prophet_all = df_city['Prophet RMSE']
-
+# Calculando o vetor rmse para cada modelo
 models = ['GCLSTM', 'GCRN', 'LSTM', 'Prophet']
 dfs = []
 
-for model in models:
-    predictions = globals()[f'rmse_{model.lower()}_all']
-    rmse_model = predictions
-    model_stats = {
-        'Model': model,
-        'Max': np.max(rmse_model),
-        'Min': np.min(rmse_model),
-        'Mean': np.mean(rmse_model),
-        'Std': np.std(rmse_model),
-    }
-    dfs.append(model_stats)
+for i, model in enumerate(models):
+    predictions = globals()[f'pred_{model.lower()}']
+    rmse_model = np.array(
+        [mean_squared_error(y_real[ind], predictions[ind], squared=False) for ind in range(y_real.shape[0])])
+    dfs.append(pd.DataFrame({
+        'Model': [model] * len(rmse_model),
+        'RMSE': rmse_model,
+    }))
+
+df_rmse = []
+# Concatenando os DataFrames de cada modelo
+df_rmse = pd.concat(dfs, ignore_index=True)
 
 # Criando o DataFrame de estatísticas
-df_stats_error = pd.DataFrame(dfs)
+df_stats_rmse = pd.DataFrame({
+    'Model': models,
+    'Max': df_rmse.groupby('Model')['RMSE'].max(),
+    'Min': df_rmse.groupby('Model')['RMSE'].min(),
+    'Mean': df_rmse.groupby('Model')['RMSE'].mean(),
+    'Std': df_rmse.groupby('Model')['RMSE'].std(),
+})
 
 # Exibindo o DataFrame de estatísticas
-print(df_stats_error)
+print(df_stats_rmse)
+
+# rmse_gclstm_all = np.load(results_gclstm + f'\\2020-2022\\metric_RMSE_all_2020-2022.npy')
+#
+# rmse_gcrn_all = np.load(results_gcrn + f'\\2020-2022\\metric_RMSE_all_2020-2022.npy')
+#
+# rmse_lstm_all = df_city['LSTM RMSE']
+#
+# rmse_prophet_all = df_city['Prophet RMSE']
+
+# models = ['GCLSTM', 'GCRN', 'LSTM', 'Prophet']
+# dfs = []
+#
+# for model in models:
+#     predictions = globals()[f'rmse_{model.lower()}_all']
+#     rmse_model = predictions
+#     model_stats = {
+#         'Model': model,
+#         'Max': np.max(rmse_model),
+#         'Min': np.min(rmse_model),
+#         'Mean': np.mean(rmse_model),
+#         'Std': np.std(rmse_model),
+#     }
+#     dfs.append(model_stats)
+#
+# # Criando o DataFrame de estatísticas
+# df_stats_error = pd.DataFrame(dfs)
+#
+# # Exibindo o DataFrame de estatísticas
+# print(df_stats_error)
+
 
 # Inicie o aplicativo Dash
 app = dash.Dash(__name__)
