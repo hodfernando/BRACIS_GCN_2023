@@ -48,11 +48,11 @@ df_time = pd.DataFrame(
               list(range(lags - 1, lags * y_real.shape[0], lags))]})
 
 # Adicionar colunas de R2 para cada modelo
-modelos = ['GCLSTM', 'GCRN', 'Prophet', 'LSTM']
-for modelo in modelos:
-    pred_modelo = globals()[f'pred_{modelo.lower()}']  # Obtém a variável pred_gclstm, pred_gcrn ou pred_prophet
+models = ['GCLSTM', 'GCRN', 'LSTM', 'Prophet']
+for model in models:
+    pred_modelo = globals()[f'pred_{model.lower()}']  # Obtém a variável pred_gclstm, pred_gcrn ou pred_prophet
     r2_modelo = [r2_score(y_real[i, :], pred_modelo[i, :]) for i in range(y_real.shape[0])]
-    df_time[f'R2_{modelo}'] = r2_modelo
+    df_time[f'R2_{model}'] = r2_modelo
 
 # R2 e RMSE do modelo Prophet
 df_city = pd.read_csv(results_prophet + '\\R2_RMSE_LSTM_Prophet.csv', sep=';')
@@ -142,8 +142,8 @@ app.layout = html.Div([
         id='resultados-rmse',
         figure={
             'data': [
-                {'x': df_city.NOMENUM, 'y': df_city[f'{modelo} RMSE'], 'type': 'bar', 'name': f'{modelo} RMSE'} for
-                modelo in modelos
+                {'x': df_city.NOMENUM, 'y': df_city[f'{model} RMSE'], 'type': 'bar', 'name': f'{model} RMSE'} for
+                model in models
             ],
             'layout': {
                 'title': 'Resultados de RMSE por Cidade',
@@ -163,9 +163,9 @@ app.layout = html.Div([
         id='resultados-yhat',
         figure={
             'data': [
-                        {'x': df_city.NOMENUM, 'y': df_city[f'Avg. Yhat {modelo}'], 'type': 'bar',
-                         'name': f'Avg. Yhat {modelo}'}
-                        for modelo in modelos
+                        {'x': df_city.NOMENUM, 'y': df_city[f'Avg. Yhat {model}'], 'type': 'bar',
+                         'name': f'Avg. Yhat {model}'}
+                        for modelo in models
                     ] + [
                         {'x': df_city.NOMENUM, 'y': df_city['Y'], 'type': 'bar', 'name': 'Y'}
                     ],
@@ -187,8 +187,8 @@ app.layout = html.Div([
         id='resultados-r2',
         figure={
             'data': [
-                {'x': df_time['Days'], 'y': df_time[f'R2_{modelo}'], 'type': 'line', 'name': f'R2_{modelo}'}
-                for modelo in modelos
+                {'x': df_time['Days'], 'y': df_time[f'R2_{model}'], 'type': 'line', 'name': f'R2_{model}'}
+                for model in models
             ],
             'layout': {
                 'title': 'Resultados de R2 ao longo do tempo',
