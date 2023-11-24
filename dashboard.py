@@ -72,9 +72,7 @@ df_city['Avg. Yhat LSTM'] = np.mean(pred_lstm, axis=0)
 df_city['Y'] = np.mean(y_real, axis=0)
 
 # Calculando o vetor rmse para cada modelo
-models = ['GCLSTM', 'GCRN', 'LSTM', 'Prophet']
 dfs = []
-
 for i, model in enumerate(models):
     predictions = globals()[f'pred_{model.lower()}']
     rmse_model = np.array(
@@ -84,7 +82,6 @@ for i, model in enumerate(models):
         'RMSE': rmse_model,
     }))
 
-df_rmse = []
 # Concatenando os DataFrames de cada modelo
 df_rmse = pd.concat(dfs, ignore_index=True)
 
@@ -99,6 +96,32 @@ df_stats_rmse = pd.DataFrame({
 
 # Exibindo o DataFrame de estatísticas
 print(df_stats_rmse)
+
+# Calculando o vetor rmse para cada modelo
+dfs = []
+for i, model in enumerate(models):
+    predictions = globals()[f'pred_{model.lower()}']
+    rmse_model = np.array(
+        [mean_squared_error(y_real[:, ind], predictions[:, ind], squared=False) for ind in range(y_real.shape[1])])
+    dfs.append(pd.DataFrame({
+        'Model': [model] * len(rmse_model),
+        'RMSE': rmse_model,
+    }))
+
+# Concatenando os DataFrames de cada modelo
+df_rmse_city = pd.concat(dfs, ignore_index=True)
+
+# Criando o DataFrame de estatísticas
+df_stats_rmse_city = pd.DataFrame({
+    'Model': models,
+    'Max': df_rmse_city.groupby('Model')['RMSE'].max(),
+    'Min': df_rmse_city.groupby('Model')['RMSE'].min(),
+    'Mean': df_rmse_city.groupby('Model')['RMSE'].mean(),
+    'Std': df_rmse_city.groupby('Model')['RMSE'].std(),
+})
+
+# Exibindo o DataFrame de estatísticas
+print(df_stats_rmse_city)
 
 # rmse_gclstm_all = np.load(results_gclstm + f'\\2020-2022\\metric_RMSE_all_2020-2022.npy')
 #
